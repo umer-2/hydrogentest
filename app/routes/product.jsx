@@ -23,6 +23,7 @@ export default function Products() {
            <h4><a href='#' style={{fontSize : '16px', fontWeight : 'bold'}}>{product.familyName}</a></h4>
            <a href='#' style={{fontSize : '14px'}}>{product.price}</a>
            <p>{product.brand}</p>
+           <h2>Stock  : <span>{product.stock}</span></h2>
         </div>
 
       ))}
