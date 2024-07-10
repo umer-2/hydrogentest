@@ -1,20 +1,12 @@
 // @ts-ignore
 // Virtual entry point for the app
 import * as remixBuild from 'virtual:remix/server-build';
-import {
-  cartGetIdDefault,
-  cartSetIdDefault,
-  createCartHandler,
-  createStorefrontClient,
-  storefrontRedirect,
-  createCustomerAccountClient,
-} from '@shopify/hydrogen';
-import {
-  createRequestHandler,
-  getStorefrontHeaders,
-} from '@shopify/remix-oxygen';
-import {AppSession} from '~/lib/session';
-import {CART_QUERY_FRAGMENT} from '~/lib/fragments';
+import { cartGetIdDefault, cartSetIdDefault, createCartHandler, createStorefrontClient, storefrontRedirect, createCustomerAccountClient, } from '@shopify/hydrogen';
+import { createRequestHandler, getStorefrontHeaders } from '@shopify/remix-oxygen';
+import { AppSession } from '~/lib/session';
+import { CART_QUERY_FRAGMENT } from '~/lib/fragments';
+import { createRickAndMortyClient } from './app/lib/createRickAndMortyClient.server';
+import { createProductClient } from './app/lib/createProductClient.server'; // Import the new client
 
 /**
  * Export a fetch handler in module format.
@@ -43,10 +35,10 @@ export default {
       /**
        * Create Hydrogen's Storefront client.
        */
-      const {storefront} = createStorefrontClient({
+      const { storefront } = createStorefrontClient({
         cache,
         waitUntil,
-        i18n: {language: 'EN', country: 'US'},
+        i18n: { language: 'EN', country: 'US' },
         publicStorefrontToken: env.PUBLIC_STOREFRONT_API_TOKEN,
         privateStorefrontToken: env.PRIVATE_STOREFRONT_API_TOKEN,
         storeDomain: env.PUBLIC_STORE_DOMAIN,
@@ -77,6 +69,16 @@ export default {
         cartQueryFragment: CART_QUERY_FRAGMENT,
       });
 
+      const rickAndMorty = createRickAndMortyClient({
+        cache,
+        waitUntil,
+      });
+
+      const productClient = createProductClient({
+        cache,
+        waitUntil,
+      }); 
+
       /**
        * Create a Remix request handler and pass
        * Hydrogen's Storefront client to the loader context.
@@ -91,6 +93,8 @@ export default {
           cart,
           env,
           waitUntil,
+          rickAndMorty,
+          productClient, // Add the new client to the context
         }),
       });
 
@@ -102,14 +106,14 @@ export default {
          * If the redirect doesn't exist, then `storefrontRedirect`
          * will pass through the 404 response.
          */
-        return storefrontRedirect({request, response, storefront});
+        return storefrontRedirect({ request, response, storefront });
       }
 
       return response;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);
-      return new Response('An unexpected error occurred', {status: 500});
+      return new Response('An unexpected error occurred', { status: 500 });
     }
   },
 };
